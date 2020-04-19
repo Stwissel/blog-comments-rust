@@ -2,16 +2,19 @@
  * Start routine RUST Comment Service
  * (C) 2020 @notessensei, Apache 2.0 license
  */
+extern crate actix;
 extern crate chrono;
 extern crate config;
 
 mod comments_config;
 mod comments_entry;
+mod comments_store;
 
+use actix::Actor;
 use actix_web::*;
-use chrono::Utc;
 use comments_entry::BlogComment;
 use comments_entry::BlogSubmission;
+use comments_store::CommentStore;
 use std::collections::HashMap;
 
 const COMMENT_PATH: &str = "/blogcomments/*";
@@ -33,18 +36,10 @@ async fn post_comment(comment_post: web::Json<BlogComment>, _req: HttpRequest) -
         params.insert(key.to_string(), value.to_str().unwrap().to_string());
     }
 
-    let submission: BlogSubmission = BlogSubmission {
-        created: Utc::now().format("%B %m, %Y %r").to_string(),
-        markdown: true,
-        parameters: params,
-        Commentor: comment_post.Commentor.clone(),
-        eMail: comment_post.eMail.clone(),
-        webSite: comment_post.webSite.clone(),
-        Body: comment_post.Body.clone(),
-        captcha: comment_post.captcha.clone(),
-        parentId: comment_post.parentId.clone(),
-    };
-
+    let submission: BlogSubmission =
+        BlogSubmission::from_blog_comment(comment_post.into_inner(), params);
+    let c_store = CommentStore::start(CommentStore {});
+    c_store.do_send(submission.clone());
     HttpResponse::Ok().json(submission)
 }
 
@@ -52,6 +47,7 @@ async fn post_comment(comment_post: web::Json<BlogComment>, _req: HttpRequest) -
 async fn main() -> std::io::Result<()> {
     let cfg = comments_config::CommentsConfig::new();
     println!("Running on port {}", cfg.port);
+
     HttpServer::new(|| {
         App::new().route("/*", web::get().to(index)).service(
             web::resource(COMMENT_PATH).name("new_comment").route(
