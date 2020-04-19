@@ -1,0 +1,8 @@
+ClientSecret = "unknown"
+ClientToken = "unknown"
+PORT = 8080
+CaptchaSecret = "unknown"
+RepositoryURL = "unknown"
+OauthURL = "unknown"
+PushUser = "unknown"
+PushToken = "unknown"
