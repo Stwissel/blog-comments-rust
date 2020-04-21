@@ -14,7 +14,7 @@ const OAUTH_URL: &str = "OauthURL";
 const PUSH_USER: &str = "PushUser";
 const PUSH_TOKEN: &str = "PushToken";
 
-//#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct CommentsConfig {
     pub client_secret: String,
     pub client_token: String,

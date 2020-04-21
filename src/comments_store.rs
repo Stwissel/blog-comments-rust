@@ -6,6 +6,7 @@
 use crate::comments_entry::BlogSubmission;
 use actix::prelude::*;
 
+#[derive(Debug)]
 pub struct CommentStore {}
 
 impl Actor for CommentStore {
